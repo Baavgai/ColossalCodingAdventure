@@ -40,3 +40,8 @@ Another location can be the **void**.  This supports the idea that objects can b
 Currently in development, the game is simply called [Rooms With No View](https://github.com/Baavgai/ColossalCodingAdventure/Rooms).  No, it's not the most exciting name, or game, but it is short and simple and will hopefully demonstrate all that's needed for you to write your own vastly superior interactive fiction.
 
 We're following a common, and simple, scenario in text adventures here: finding oneself somewhere and needing to escape.  The escape is achieved by solving a puzzle via interacting with the environment.  And, of course, failure is possible, else it wouldn't be much fun.
+
+## Wait! I'm not cut out to be a programmer.
+While we are here encourage the programmer with the lure of text adventure greatness, we'll understand if you just want to design the game and not the code.  Ok, it's weird perspective, as programming is the coolest thing ever, but some people are like that.
+
+We would be remiss not to mention [Inform](http://inform7.com/) "a design system for interactive fiction based on natural language."  That is, if you just want to do the story stuff.  Even if you do want to write your very own program, you still might want to pop over there for some inspiration.
