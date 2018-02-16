@@ -2,43 +2,28 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include "../lib/capl_c.h"
 
-#define COMMAND_MAX_BUFF 500
-#define DISPLAY_WIDTH 70
+#define K_DONE "done"
+#define K_PLAYER "player"
 
-enum Location {
-    L1
-};
+void play(State *);
 
-enum StateKey {
-    S_PLAYER,
-    S_DONE,
-    S_L1_OPEN,
-    S_STATE_SIZE
-};
-
-typedef int State[S_STATE_SIZE];
-
-typedef struct {
-    char cmd[COMMAND_MAX_BUFF], verb[COMMAND_MAX_BUFF], noun[COMMAND_MAX_BUFF];
-} ParsedCommand;
-
-
-void userInput(ParsedCommand *);
-void display(const char *);
-void play(State);
 
 int main() {
-    State state = { 0 };
-    state[S_DONE] = 0;
+    State *s = stateCreate();
     
+    // stateSet(s, 0, "done", 0);
     display(
         "You awake on a musty smelling bed in a spartan, windowless, room."
         " You see a painting on the wall that seems to be staring at you and a closed door."
         " You feel trapped.  You don't know how you got here, but it can't be good.");
-    state[S_PLAYER] = L1;
-    while(!state[S_DONE]) {
-        play(state);
+    stateSet(s, 0, K_PLAYER, 1);
+    // userInput(&cmd);
+    // printf("cmd=%s\nverb=%s\nnoun=%s\n", cmd.cmd, cmd.verb, cmd.noun);
+    // printf("done = %d %d\n", stateHas(s, 0, "done"), stateGet(s,0,"done"));
+    while(!stateHas(s, 0, K_DONE)) {
+        play(s);
     }
     return 0;
 }
@@ -47,38 +32,35 @@ int main() {
 #define V(x) (strcmp(pc->verb, x)==0)
 #define N(x) (strcmp(pc->noun, x)==0)
 
-bool zone1(State s, ParsedCommand *pc) {
-    if (s[S_PLAYER] != L1) { return false; }
-    if (C("look") && !s[S_L1_OPEN]) {
+bool zone1(State *s, ParsedCommand *pc) {
+    const int z = 1;
+    if (stateGet(s,0,K_PLAYER)!=z) { return false; }
+    if (C("look") && !stateHas(s, z, "door_open")) {
         display("You are in a small room with a bed, a creepy portrait, and a closed door.");
     } else if (C("look")) {
         display("You are in a small room with a bed, a creepy portrait, and a open door.");
-    } else if (C("look door") && s[S_L1_OPEN]) {
+    } else if (C("look door") && stateHas(s, z, "door_open")) {
         display("The door is open, revealing a more spacious room beyond.");
     } else if (C("look door")) {
         display("The door is very sturdy, but appears unlocked.");
-    } else if (C("open door") && s[S_L1_OPEN]) {
-        display("The door is already open.");
-    } else if (C("open door")) {
-        display("The door creeks open ominously.");
-        s[S_L1_OPEN] = true;
     } else {
         return false;
     }
     return true;
 }
 
-bool zone0(State s, ParsedCommand *pc) {
+bool zone0(State *s, ParsedCommand *pc) {
+    const int z = 0;
     if (C("die")) {
         display("You throw yourself at the ground.  Hard.  Ouch.  The world swirls away into darkness.");
-        s[S_DONE] = 1;
+        stateSet(s, 0, K_DONE, 1);
     } else {
         return false;
     }
     return true;
 }
 
-void play(State s) {
+void play(State *s) {
     ParsedCommand c;
     userInput(&c);
     // printf("cmd=\"%s\"\nverb=\"%s\"\nnoun=\"%s\"\n", c.cmd, c.verb, c.noun);  stateDump(s);
@@ -144,45 +126,3 @@ don't know how you got here, but it can't be good.
 > ^C
 bam@root:~/gitlocal/ColossalCodingAdventure/Rooms$
 ```*/
-
-
-void userInput(ParsedCommand *cmd) {
-    bool done = false;
-    while(!done) {
-        printf("> ");
-        if(fgets(cmd->cmd, sizeof(cmd->cmd)-1, stdin)) {
-            switch(sscanf( cmd->cmd, "%s %s", cmd->verb, cmd->noun )) {
-                case 1: *(cmd->noun) = 0;
-                case 2: done = true;
-            }
-        }
-        strcpy(cmd->cmd, cmd->verb);
-        if (*(cmd->noun) != 0) {
-          strcat(strcat(cmd->cmd, " "), cmd->noun);
-        }
-        
-    }
-}
-
-void display(const char *s) {
-    int scanned, last;
-    for(scanned = last = 0; s[scanned] != '\0'; scanned++) {
-        if (scanned==DISPLAY_WIDTH) {
-            if (last==0) {
-                for(;scanned!=0; s++, scanned--) { putchar(*s); }
-            } else {
-                for(;last!=0; s++, last--) { putchar(*s); }
-                scanned = 0;
-            }
-            putchar('\n');
-            for(;*s==' '; s++);
-        }
-        if (s[scanned]==' ') {
-            last = scanned;
-        } else if (s[scanned]=='\n') {
-            for(;scanned!=0; s++, scanned--) { putchar(*s); };
-            last = 0;
-        }
-    }
-    if (*s!='\0') { printf("%s\n", s); } else { putchar('\n'); }
-}
