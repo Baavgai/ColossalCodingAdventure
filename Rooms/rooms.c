@@ -1,33 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include "../lib/capl_c.h"
 
+#define K_DONE "done"
+#define K_PLAYER "player"
 
 void play(State *);
-void showText(const char *);
+
 
 int main() {
     State *s = stateCreate();
     
     // stateSet(s, 0, "done", 0);
-    showText(
+    display(
         "You awake on a musty smelling bed in a spartan, windowless, room."
         " You see a painting on the wall that seems to be staring at you and a closed door."
         " You feel trapped.  You don't know how you got here, but it can't be good.");
-    stateSet(s, 0, "player", 1);
+    stateSet(s, 0, K_PLAYER, 1);
     // userInput(&cmd);
     // printf("cmd=%s\nverb=%s\nnoun=%s\n", cmd.cmd, cmd.verb, cmd.noun);
     // printf("done = %d %d\n", stateHas(s, 0, "done"), stateGet(s,0,"done"));
-    while(!stateHas(s, 0, "done")) {
+    while(!stateHas(s, 0, K_DONE)) {
         play(s);
     }
     return 0;
-}
-
-void showText(const char *s) {
-    // we'll pretty this later
-    printf("%s\n", s);
 }
 
 #define C(x) (strcmp(pc->cmd, x)==0)
@@ -36,15 +34,15 @@ void showText(const char *s) {
 
 bool zone1(State *s, ParsedCommand *pc) {
     const int z = 1;
-    if (stateGet(s,0,"player")!=z) { return false; }
+    if (stateGet(s,0,K_PLAYER)!=z) { return false; }
     if (C("look") && !stateHas(s, z, "door_open")) {
-        showText("You are in a small room with a bed, a creepy portrait, and a closed door.");
+        display("You are in a small room with a bed, a creepy portrait, and a closed door.");
     } else if (C("look")) {
-        showText("You are in a small room with a bed, a creepy portrait, and a open door.");
+        display("You are in a small room with a bed, a creepy portrait, and a open door.");
     } else if (C("look door") && stateHas(s, z, "door_open")) {
-        showText("The door is open, revealing a more spacious room beyond.");
+        display("The door is open, revealing a more spacious room beyond.");
     } else if (C("look door")) {
-        showText("The door is very sturdy, but appears unlocked.");
+        display("The door is very sturdy, but appears unlocked.");
     } else {
         return false;
     }
@@ -54,8 +52,8 @@ bool zone1(State *s, ParsedCommand *pc) {
 bool zone0(State *s, ParsedCommand *pc) {
     const int z = 0;
     if (C("die")) {
-        showText("You throw yourself at the ground.  Hard.  Ouch.  The world swirls away into darkness.");
-        stateSet(s, 0, "done", 1);
+        display("You throw yourself at the ground.  Hard.  Ouch.  The world swirls away into darkness.");
+        stateSet(s, 0, K_DONE, 1);
     } else {
         return false;
     }
@@ -67,8 +65,9 @@ void play(State *s) {
     userInput(&c);
     // printf("cmd=\"%s\"\nverb=\"%s\"\nnoun=\"%s\"\n", c.cmd, c.verb, c.noun);  stateDump(s);
     if (!(zone1(s, &c) || zone0(s, &c))) {
-        sprintf(c.noun, "I'm confused, I don't understand '%s'", c.cmd);
-        showText(c.noun);
+        char buff[1000];
+        sprintf(buff, "I'm confused, I don't understand '%s'", c.cmd);
+        display(buff);
     }
 }
 
@@ -119,5 +118,11 @@ rz (v=="look" && n in ["painting","portrait","picture"])
 
 set,get,has,del,rz,az = localize 2
 
-
+bam@root:~/gitlocal/ColossalCodingAdventure/Rooms$ ./a.out
+You awake on a musty smelling bed in a spartan, windowless,
+room. You see a painting on the wall that seems to be
+staring at you and a closed door. You feel trapped.  You
+don't know how you got here, but it can't be good.
+> ^C
+bam@root:~/gitlocal/ColossalCodingAdventure/Rooms$
 ```*/

@@ -7,6 +7,26 @@
 #define D stateDump(s); printf("---\n");
 
 int main() {
+    display(
+        "ABC DEFG HIJKL MNOPQR STUVWX YZ0123 456 789 "
+        "ABC DEFG HIJKL MNOPQR STUVWX YZ0123 456 789 "
+        "ABC DEFG HIJKL MNOPQR STUVWX YZ0123 456 789 "
+        "ABC DEFG HIJKL MNOPQR STUVWX YZ0123 456 789\n"
+        "ABC DEFG HIJKL MNOPQR STUVWX YZ0123 456 789 "
+        "ABC DEFG HIJKL MNOPQR STUVWX YZ0123 456 789 "
+        "ABC DEFG HIJKL MNOPQR STUVWX YZ0123 456 789 "
+        "ABC DEFG HIJKL MNOPQR STUVWX YZ0123 456 789\n"
+        "ABC DEFG HIJKL MNOPQR STUVWX YZ0123 456 789 "
+        "ABC DEFG HIJKL MNOPQR STUVWX YZ0123 456 789 "
+        "ABC DEFG HIJKL MNOPQR STUVWX YZ0123 456 789 "
+        "ABC DEFG HIJKL MNOPQR STUVWX YZ0123 456 789 "
+        "ABC DEFG HIJKL MNOPQR STUVWX YZ0123 456 789 "
+        "ABC DEFG HIJKL MNOPQR STUVWX YZ0123 456 789\n"
+        "ABC DEFG HIJKL MNOPQR STUVWX YZ0123 456 789 "
+        "ABC DEFG HIJKL MNOPQR STUVWX YZ0123 456 789 "
+        " tail"
+        );
+    /*
     State *s = stateCreate();
     printf("begin\n");
     stateSet(s, 0, "Foo", 1);
@@ -16,5 +36,6 @@ int main() {
     stateDel(s, 0, "foo");
     D;
     printf("end\n");
+    */
     return 0;
 }

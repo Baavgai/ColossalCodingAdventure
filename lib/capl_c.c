@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <ctype.h>
 #include "capl_c.h"
 
 typedef struct StateNode_s {
@@ -129,4 +130,26 @@ void userInput(ParsedCommand *cmd) {
         
     }
 }
-
+// DISPLAY_WIDTH
+void display(const char *s) {
+    int scanned, last;
+    for(scanned = last = 0; s[scanned] != '\0'; scanned++) {
+        if (scanned==DISPLAY_WIDTH) {
+            if (last==0) {
+                for(;scanned!=0; s++, scanned--) { putchar(*s); }
+            } else {
+                for(;last!=0; s++, last--) { putchar(*s); }
+                scanned = 0;
+            }
+            putchar('\n');
+            for(;*s==' '; s++);
+        }
+        if (s[scanned]==' ') {
+            last = scanned;
+        } else if (s[scanned]=='\n') {
+            for(;scanned!=0; s++, scanned--) { putchar(*s); };
+            last = 0;
+        }
+    }
+    if (*s!='\0') { printf("%s\n", s); } else { putchar('\n'); }
+}
