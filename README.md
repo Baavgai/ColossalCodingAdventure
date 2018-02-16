@@ -34,7 +34,7 @@ In our text game, various discrete objects have their own state.  The state of a
 
 There are locations in which the player finds themselves.  There are objects that may be picked up or put down, in which case they change location.  Or objects might be opened or closed, in which case the object itself has changed state.  Note that since the player may carry objects, the player themselves is technically a location.
 
-Another location can be the **void**.  This supports the idea that objects can be introduced into or removed from our game world.  The match you just struck?  The unlit match has moved to the void, the lit match has moved from the void and will return shortly.  The concept behind this is that we define all objects initially and needn't worry about new objects magically appearing as we program.  This isn't always apropriate, but for this kind of text adventure it makes life easier.
+Another location can be the **void**.  This supports the idea that objects can be introduced into or removed from our game world.  The match you just struck?  The unlit match has moved to the void, the lit match has moved from the void and will return shortly.  The concept behind this is that we define all objects initially and needn't worry about new objects magically appearing as we program.  This isn't always appropriate, but for this kind of text adventure it makes life easier.
 
 ## Our Game
 Currently in development, the game is simply called [Rooms With No View](https://github.com/Baavgai/ColossalCodingAdventure/tree/master/Rooms).  No, it's not the most exciting name, or game, but it is short and simple and will hopefully demonstrate all that's needed for you to write your own vastly superior interactive fiction.
