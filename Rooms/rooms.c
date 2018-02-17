@@ -4,6 +4,15 @@
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include "../../lib/c/cca.h"
+
+// gcc ../../lib/c/cca.c rooms.c
+
+#define C(x) (strcmp(c->full, x)==0)
+#define V(x) (strcmp(c->verb, x)==0)
+#define N(x) (strcmp(c->noun, x)==0)
+
+MK_DISPLAY_WIDTH(70)
 
 typedef enum {
     LOC_VOID, LOC_PLAYER, 
@@ -17,17 +26,6 @@ typedef struct {
     bool r1_pic_seen;
 } State;
 
-#define COMMAND_MAX 100
-typedef struct {
-    char full[COMMAND_MAX];
-    char *verb, *noun;
-    char buffer[COMMAND_MAX];
-} Command;
-
-char *sanitizeCommandEntered(char *);
-bool parseCommand(Command *, const char *);
-void loadUserCommand(Command *);
-void display(const char *fmt, ...);
 State *initState();
 void play(State *);
 
@@ -49,10 +47,6 @@ State *initState() {
     s->player = LOC_R1;
     return s;
 }
-
-#define C(x) (strcmp(c->full, x)==0)
-#define V(x) (strcmp(c->verb, x)==0)
-#define N(x) (strcmp(c->noun, x)==0)
 
 void itemFail(const char *thing) {
     display("You don't see a \"%s\" here.", thing);
@@ -123,123 +117,15 @@ bool defaultHandler(State *s, Command *c) {
     return true;
 }
 
-// void (*pf[])(void) = {fna, fnb, fnc, ..., fnz};
+
+void handleAll(State *s, Command *c) {
+    locR1Handler(s,c) || locR2Handler(s,c) || locR3Handler(s,c)
+    || locR4Handler(s,c) || locR5Handler(s,c)
+    || defaultHandler(s, c);
+}
 
 void play(State *s) {
-    static bool(*handlers[])(State *, Command *)  = {
-        locR1Handler, locR2Handler, locR3Handler, locR4Handler, locR5Handler,
-        defaultHandler
-    };
-    static const int handlerCount = sizeof(handlers) / sizeof(*handlers);
-    int i;
     Command c;
     loadUserCommand(&c);
-    for(i=0; i<handlerCount; i++) {
-        if (handlers[i](s, &c)) { break; }
-    }
+    handleAll(s, &c);
 }
-
-
-// lib ----------
-
-char *sanitizeCommandEntered(char *cmd) {
-    bool lastSpace = true;
-    char *s = cmd;
-    char *d = cmd;
-    // for(; *s!=' '; s++);
-    for(; *s!='\0'; s++) {
-        if (*s==' ') {
-            if (!lastSpace) {
-                *d++ = ' ';
-                lastSpace = true;
-            }
-        } else if (isalpha(*s)) {
-            *d++ = tolower(*s);
-            lastSpace = false;
-        }
-    }
-    if (d>cmd && *(d - 1)==' ') { --d; }
-    *d= '\0';
-    return cmd;
-}
-
-bool parseCommand(Command *cmd, const char *s) {
-    if (sanitizeCommandEntered(strcpy(cmd->full, s))[0]==0) { 
-        cmd->buffer[0] = 0;
-        cmd->noun = cmd->verb = cmd->buffer;
-        return false;
-    } else {
-        cmd->noun = cmd->verb = strcpy(cmd->buffer, cmd->full);
-        for(; *(cmd->noun)!='\0'; cmd->noun++) {
-            if (*(cmd->noun)==' ') {
-                *(cmd->noun)='\0';
-                cmd->noun++;
-                break;
-            }
-        }
-        return true;
-    }
-}
-
-void loadUserCommand(Command *cmd) {
-    char buffer[COMMAND_MAX];
-    bool done = false;
-    while(!done) {
-        printf("> ");
-        if(fgets(buffer, COMMAND_MAX - 1, stdin)) {
-            done = parseCommand(cmd, buffer);
-        }
-    }
-}
-
-
-void displayWrap(const char *s, const int width) {
-    int scanned, last;
-    for(scanned = last = 0; s[scanned] != '\0'; scanned++) {
-        if (scanned==width) {
-            if (last==0) {
-                for(;scanned!=0; s++, scanned--) { putchar(*s); }
-            } else {
-                for(;last!=0; s++, last--) { putchar(*s); }
-                scanned = 0;
-            }
-            putchar('\n');
-            for(;*s==' '; s++);
-        }
-        if (s[scanned]==' ') {
-            last = scanned;
-        } else if (s[scanned]=='\n') {
-            for(;scanned!=0; s++, scanned--) { putchar(*s); };
-            last = 0;
-        }
-    }
-    if (*s!='\0') { printf("%s\n", s); } else { putchar('\n'); }
-}
-
-void display(const char *fmt, ...) {
-  char buffer[2000];
-  va_list args;
-  va_start (args, fmt);
-  vsnprintf (buffer, sizeof(buffer)-1, fmt, args);
-  va_end (args);
-  displayWrap(buffer, 70);
-}
-
-/*
-
-    
-
-    while(sscanf( buff, "%s", word )) {
-        if (!buff!=0) { strcat(buff, " ") };
-        printf("> ");
-        if(fgets(buff, sizeof(buff)-1, stdin)) {
-            switch(sscanf( buff, "%s %s", verb, noun )) {
-                case 1: *noun = 0;
-                case 2: done = true;
-            }
-        }
-    }
-    cmd->verb = verb;
-    cmd->noun = noun;
-
-*/
