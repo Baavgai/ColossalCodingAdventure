@@ -1,49 +1,25 @@
+import sys, os
+
+sys.path.append(os.path.abspath(os.path.join('..','lib','python')))
+
+import cca
+from cca import cmd_verb_noun, tern, get_command_from_user
+
+
 class Location:
     VOID, PLAYER, R1, R2, R3, R4, R5 = range(7)
 
-class State:
+class State(cca.StateBase):
     def __init__(self):
+        cca.StateBase.__init__(self)
         self.player = Location.R1
-        self.done = False
         self.r1_door_open = False
         self.r1_pic_seen = False
 
-def tern(cond, x, y):
-    if cond:
-        return x
-    return y
 
-def show(msg):
-    DISPLAY_SIZE = 70
-    s = " ".join(msg.split())
-    while len(s)>DISPLAY_SIZE:
-        idx = s[:DISPLAY_SIZE].rfind(' ')
-        if idx==-1:
-            print(s[:DISPLAY_SIZE])
-            s = s[DISPLAY_SIZE:]
-        else:
-            print(s[:idx])
-            s = s[(idx+1):]
-    if len(s)>0:
-        print(s)
+# def item_fail(show, thing):    show("You don't see any \"{}\" here.".format(thing))
 
-def showIfElse(cond, x, y):
-    show(tern(cond, x, y))
-
-def cmd_verb_noun(s):
-    xs = s.lower().split()
-    cmd = " ".join(xs)
-    if len(xs)==0:
-        return cmd, "", ""
-    elif len(xs)==1:
-        return cmd, xs[0], ""
-    else:
-        return cmd, xs[0], " ".join(xs[1:])
-
-def item_fail(thing):
-    show("You don't see a \"{}\" here.".format(thing))
-
-def loc_r1_handler(s,cmd):
+def loc_r1_handler(s, cmd, show):
     if s.player!=Location.R1:
         return False
     (c,v,n) = cmd
@@ -65,7 +41,7 @@ def loc_r1_handler(s,cmd):
     elif c == "open door" and s.r1_door_open:
         show("The door is already open.")
     elif c == "open door":
-        show("The door is already open.")
+        show("The door creeks open ominously.")
         s.r1_door_open = True
     elif c == "close door":
         show(tern(s.r1_door_open,
@@ -85,7 +61,7 @@ def loc_r1_handler(s,cmd):
     return True
 
 
-def default_handler(s,cmd):
+def default_handler(s, cmd, show):
     (c,v,n) = cmd
     if v=="die":
         show("You throw yourself at the ground.  Hard.  Ouch.  The world swirls away into darkness.")
@@ -95,21 +71,36 @@ def default_handler(s,cmd):
     return True
     
 
+def handler(s, cmd, show):
+    locs = [
+        loc_r1_handler,
+        default_handler
+    ]
+    done = False
+    for loc in locs:
+        if loc(s, cmd, show):
+            break
 
-def foo(x):
-    s = State()
-    cmd = cmd_verb_noun(x)
-    loc_r1_handler(s,cmd) or default_handler(s,cmd)
+def play(game_input):
+    def show(msg):
+        cca.show(msg, 70)
+    state = State()
+    show(
+        "You awake on a musty smelling bed in a spartan, windowless, room."
+        " You see a painting on the wall that seems to be staring at you and a closed door."
+        " You feel trapped.  You don't know how you got here, but it can't be good.")
+    cca.play_game(state, handler, game_input, show)
+
+def main():
+    play(cca.get_command_from_user)
 
 
-show(
-    "You awake on a musty smelling bed in a spartan, windowless, room."
-    " You see a painting on the wall that seems to be staring at you and a closed door."
-    " You feel trapped.  You don't know how you got here, but it can't be good.")
+def run_test():
+    lines = [
+        "look", "look door"
+    ]
+    play(cca.TestGameInput(lines).game_input)
 
+# main()
+run_test()
 
-foo("look up")
-
-foo("look door")
-
-#     } else if(V("look")||V("open")||V("close")) {        itemFail(c->noun);
