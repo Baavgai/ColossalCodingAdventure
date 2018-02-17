@@ -1,12 +1,13 @@
 # Rooms With No View
+
 "You awake on a musty smelling bed in a spartan, windowless, room.
 You see a painting on the wall that seems to be staring at you and a closed door.
 You feel trapped.  You don't know how you got here, but it can't be good."
 
 That's our intro text.  Putting it up here will hopefully set our tone.  It's also a good way to describe a given text adventure.  The first line of the novel is always pregnant with meaning and foreshadowing.
 
-
 ## High level summary
+
 RoomId | Details
 -- | --
 R1 | Starting room, has a creepy portrait and a closed door.
@@ -16,12 +17,15 @@ R4 | Unlocked.  The interior is completely dark.  If entered without candle, wil
 R5 | Escape, yay, etc.
 
 ## Detail
+
 Now we take the above and flesh it out.  There is a lot of room here for script writers to have fun.  A programmer might jump right into code here.  However, we don't know how we're going to code it exactly, yet.  Instead, we'll storyboard it, using a grid to show how each command gets a response based on state and possibly changes that state.  How a given language might implement this is entirely up to the programmer.
 
 ### Locations
+
 P, R1, R2, R3, R4, R5
 
 ### Initial State
+
 Flag | Value
 ---- | ---- 
 player | R1
@@ -30,6 +34,7 @@ r1_door_open | false
 r1_pic_seen | false
 
 ### R1 Location
+
 - look
   - (r1_door_open) "You are in a small room with a bed, a creepy portrait, and a closed door."
   - (!r1_door_open) "You are in a small room with a bed, a creepy portrait, and an open door."
@@ -50,10 +55,10 @@ r1_pic_seen | false
   - (!r1_pic_seen) [r1_pic_seen=true] "The person portrayed hard to make out.  The painting is either badly aged or actually painted out of focus.  The subject could be a grotesque man or woman or angry lawn gnome.  The only element piercingly clear are black blood shot eyes that stare back at you with malice."
 
 ### R2 Location
+
 - look
   - "You are in a room with three doors, yellow, red, and blue.  On the remaining wall is a disturbing painting."
-- look painting, look picture 
+- look painting, look picture
   - "What initial looked butchered swine turns out to be a field of blood red poppies on a hill of dead yellow grass.  Still creepy.  And vaguely porcine."
 - go yellow, use yellow, yellow
   - [player=R1] "You exit the room through the yellow door."
-  

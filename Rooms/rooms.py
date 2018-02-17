@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import sys, os
 
 sys.path.append(os.path.abspath(os.path.join('..','lib','python')))
@@ -60,6 +62,22 @@ def loc_r1_handler(s, cmd, show):
         return False
     return True
 
+def loc_r2_handler(s, cmd, show):
+    if s.player!=Location.R2:
+        return False
+    (c,v,n) = cmd
+    if c=="look":
+        show("You are in a room with three doors, yellow, red, and blue.  On the remaining wall is a disturbing painting.")
+    elif v=="look" and n in [ "painting", "picture" ]:
+        show("What initial looked butchered swine turns out to be a field of blood red poppies on"
+        " a hill of dead yellow grass.  Still creepy.  And vaguely porcine.")
+    elif c in ["go yellow", "use yellow", "yellow" ]:
+        show("You exit the room through the yellow door.")
+        s.player = Location.R1
+    else:
+        return False
+    return True
+
 
 def default_handler(s, cmd, show):
     (c,v,n) = cmd
@@ -74,6 +92,7 @@ def default_handler(s, cmd, show):
 def handler(s, cmd, show):
     locs = [
         loc_r1_handler,
+        loc_r2_handler,
         default_handler
     ]
     done = False
@@ -96,11 +115,9 @@ def main():
 
 
 def run_test():
-    lines = [
-        "look", "look door"
-    ]
+    lines = [  "look", "look door"  ]
     play(cca.TestGameInput(lines).game_input)
 
-# main()
-run_test()
+main()
+# run_test()
 
