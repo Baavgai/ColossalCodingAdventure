@@ -59,6 +59,6 @@ r1_pic_seen | false
 - look
   - "You are in a room with three doors, yellow, red, and blue.  On the remaining wall is a disturbing painting."
 - look painting, look picture
-  - "What initial looked butchered swine turns out to be a field of blood red poppies on a hill of dead yellow grass.  Still creepy.  And vaguely porcine."
+  - "What initial looked like butchered swine turns out to be a field of blood red poppies on a hill of dead yellow grass.  Still creepy.  And vaguely porcine."
 - go yellow, use yellow, yellow
   - [player=R1] "You exit the room through the yellow door."

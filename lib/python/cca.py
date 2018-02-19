@@ -1,6 +1,35 @@
-class StateBase:
-    def __init__(self):
-        self.done = False
+class State(object):
+    def __init__(self, *args, **kwargs):
+        self.__lookup = dict(*args, **kwargs)
+
+    def __getitem__(self, key):
+        return self.__lookup[key]
+
+    def __getattr__(self, key):
+        return self.__lookup[key]
+
+    def set_diff(self, **kwargs):
+        return [ x for x in set(kwargs.keys()).difference(self.__lookup.keys()) ]
+
+    def __check_diff(self, **kwargs):
+        diff = self.set_diff(**kwargs)
+        if len(diff)==1:
+            raise NameError("\"{}\" is an invalid state attribute.".format(diff[0]))
+        elif len(diff)>1:
+            raise NameError("[\"{}\"] are invalid state attributes.".format("\",\"".join(diff)))
+
+    def next(self, **kwargs):
+        self.__check_diff(**kwargs)
+        d = dict(self.__lookup)
+        d.update(**kwargs)
+        return State(**d)
+
+    def __iter__(self):
+        return iter(self.__lookup)
+
+    def __repr__(self):
+        return "%s(%r)" % (self.__class__, self.__lookup)
+
 
 class TestGameInput:
     def __init__(self, lines, end_command = "die"):
@@ -17,12 +46,6 @@ class TestGameInput:
         else:
             return self.send_result(self.end_command)
 
-
-def tern(cond, x, y):
-    if cond:
-        return x
-    return y
-
 def show(msg, width):
     s = " ".join(msg.split())
     while len(s)>width:
@@ -36,15 +59,15 @@ def show(msg, width):
     if len(s)>0:
         print(s)
 
-def cmd_verb_noun(s):
+def verb_noun(s):
     xs = s.lower().split()
     cmd = " ".join(xs)
     if len(xs)==0:
-        return cmd, "", ""
+        return "", ""
     elif len(xs)==1:
-        return cmd, xs[0], ""
+        return xs[0], ""
     else:
-        return cmd, xs[0], " ".join(xs[1:])
+        return xs[0], " ".join(xs[1:])
 
 def get_command_from_user():
     line = ""
@@ -53,6 +76,6 @@ def get_command_from_user():
         line = input().strip()
     return line
 
-def play_game(state, handler, game_input,display):
+def play_game(state, handler, game_input, display):
     while not state.done:
-        handler(state, cmd_verb_noun(game_input()),display)
+        handler(state, verb_noun(game_input()), display)
