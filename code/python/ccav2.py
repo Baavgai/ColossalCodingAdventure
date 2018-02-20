@@ -1,38 +1,130 @@
-class State(object):
+class AttrCollection(dict):
     def __init__(self, *args, **kwargs):
-        self._id = 0
-        self.__lookup = dict(*args, **kwargs)
-
-    def __getitem__(self, key):
-        return self.__lookup[key]
+        dict.__init__(self, *args, **kwargs)
 
     def __getattr__(self, key):
-        return self.__lookup[key]
+        return self[key]
 
-    def set_diff(self, **kwargs):
-        return [ x for x in set(kwargs.keys()).difference(self.__lookup.keys()) ]
+    def match_keys(self, **kwargs):
+        return [ x for x in set(kwargs.keys()).intersection(self.keys()) ]
 
-    def __check_diff(self, **kwargs):
-        diff = self.set_diff(**kwargs)
+    def _diff_keys(self, **kwargs):
+        return [ x for x in set(kwargs.keys()).difference(self.keys()) ]
+
+    def _check_diff(self, **kwargs):
+        diff = self._diff_keys(**kwargs)
         if len(diff)==1:
-            raise NameError("\"{}\" is an invalid state attribute.".format(diff[0]))
+            raise NameError("\"{}\" is an invalid attribute.".format(diff[0]))
         elif len(diff)>1:
-            raise NameError("[\"{}\"] are invalid state attributes.".format("\",\"".join(diff)))
+            raise NameError("[\"{}\"] are invalid attributes.".format("\",\"".join(diff)))
 
-    def next(self, **kwargs):
-        self.__check_diff(**kwargs)
-        d = dict(self.__lookup)
+    def has_all_keys(self, **kwargs):
+        return len(set(kwargs.keys()).difference(self.keys()))==0
+
+    def match(self, **kwargs):
+        return all(self.get(k) == v for (k,v) in kwargs.items() if k in self)
+
+    def match_all(self, **kwargs):
+        self._check_diff(**kwargs)
+        return all(self.get(k) == v for (k,v) in kwargs.items())
+    
+    def apply(self, **kwargs):
+        d = dict(self)
         d.update(**kwargs)
-        s = State(**d)
-        s._id = self._id + 1
-        return s
+        return AttrCollection(**d)
 
-    def __iter__(self):
-        return iter(self.__lookup)
 
-    def __repr__(self):
-        return "<State (%d) %r>" % (self._id, self.__lookup)
+class State(AttrCollection):
+    def __init__(self, *args, **kwargs):
+        AttrCollection.__init__(self, *args, **kwargs)
+        self._id = 0
 
+    def apply(self, **kwargs):
+        self._check_diff(**kwargs)
+        d = dict(self)
+        d.update(**kwargs)
+        return State(**d)
+
+
+class VerbNounMatcher(object):
+    def __init__(self, verb_noun):
+        self.values = VerbNounMatcher.declare_expander(verb_noun)
+    def match(self, verb, noun):
+        return any((v==None or v==verb) and (n==None or n==noun) for (v,n) in self.values)
+
+    def declare_expander(match_pairs, top = True):
+        if not match_pairs or len(match_pairs)==0 or (len(match_pairs)==1 and match_pairs[0]==None):
+            return [ (None,None) ]
+        elif any(type(x)==str for x in match_pairs):
+            if len(match_pairs)==1:
+                return [ (match_pairs[0], None) ]
+            elif all(type(x)==str for x in match_pairs):
+                return [ (match_pairs[0], match_pairs[1]) ]
+            else:
+                v, n = match_pairs[0], match_pairs[1]
+                if v==None or n==None:
+                    return [ (v,n) ]
+                elif type(v)==str:
+                    return [ (v, x) for x in n ]
+                else:
+                    return [ (x, n) for x in v ]
+        elif top:
+            xs = []
+            for x in [ VerbNounMatcher.declare_expander(x, False) for x in match_pairs ]:
+                if x:
+                    xs.extend(x)
+            return xs
+        else:
+            return None
+
+
+class Rule(object):
+    def __init__(self, verb_noun, msg_or_msg_func, check = None, mutate = None):
+        self.vn_match = VerbNounMatcher(verb_noun)
+        self._mutate = mutate
+        self._msg_or_msg_func = msg_or_msg_func
+        if check:
+            self._check = AttrCollection(check).match
+        else:
+            self._check = None
+
+    def get_msg(self, verb, noun, state):
+        if type(self._msg_or_msg_func)==str:
+            return self._msg_or_msg_func
+        else:
+            return self._msg_or_msg_func(verb, noun, state)
+
+    def match(self, verb, noun, state):
+        if not self.vn_match.match(verb, noun):
+            return False
+        if self._check:
+            return self._check(**state)
+        return True
+    
+    def apply(self, verb, noun, state, force = False):
+        if force or self.match(verb, noun, state):
+            msg = {"msg": self.get_msg(verb,noun,state)}
+            if self._mutate:
+                return state.apply(**msg).apply(**(self._mutate))
+            else:
+                return state.apply(**msg)
+        else:
+            return None
+
+class RulesBuilder(object):
+    def __init__(self, default_check = None):
+        self.default_check = default_check
+        self.rules = []
+    def add(self, verb_noun, msg_or_msg_func, check = None, mutate = None):
+        if not self.default_check:
+            r = Rule(verb_noun, msg_or_msg_func, check, mutate)
+        else:
+            d = dict(self.default_check)
+            if check:
+                d.update(check)
+            r = Rule(verb_noun, msg_or_msg_func, d, mutate)
+        self.rules.append(r)
+        return self
 
 class TestGameInput:
     def __init__(self, lines, end_command = "die"):
@@ -79,37 +171,10 @@ def get_command_from_user():
         line = input().strip()
     return line
 
-def create_rule(verb_match, noun_match, msg_or_msg_func, check = None, mutate = None):
-    def build_rule(match, msg_func, next):
-        def rule(verb, noun, state):
-            if match(verb, noun, state):
-                return next(msg_func(verb, noun, state), state)
-            return None
-        return rule
-    def match_impl(verb, noun, state):
-        if not (verb_match==None or verb_match==verb):
-            return False
-        if not (noun_match==None or noun_match==noun):
-            return False
-        return not check or check(state)
-    def mutate_impl(msg, state):
-        if mutate:
-            return mutate(state.next(msg=msg))
-        else:
-            return state.next(msg=msg)
-    def msg_func_impl(verb, noun, state):
-        if type(msg_or_msg_func)==str:
-            return msg_or_msg_func
-        else:
-            return msg_or_msg_func(verb, noun, state)
-    return build_rule(match_impl, msg_func_impl, mutate_impl)
-
-
 def apply_rules(rules, verb, noun, state):
     for rule in rules:
-        result = rule(verb, noun, state)
-        if result:
-            return result
+        if rule.match(verb, noun, state):
+            return rule.apply(verb, noun, state)
     return state
 
 def play_game(state, rules, game_input, display):
@@ -120,13 +185,4 @@ def play_game(state, rules, game_input, display):
             print(state)
         display(state.msg)
 
-"""
-def localize_create_rule(location_id, location_value):
-    def f(verb_match, noun_match, msg_or_msg_func, check = None, mutate = None):
-        if check:
-            chk2 = lambda state: state[location_id]
-        create_rule(verb_match, noun_match, check, mutate)
-        return not check or check(state)
-    return f
-"""
-    
+

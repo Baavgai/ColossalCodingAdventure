@@ -19,8 +19,8 @@ INIT_STATE = cca.State({
 })
 
 
-def rules_r1(rb):
-    rb.default_check = {'player': Location.R1}
+def rules_r1():
+    rb = cca.RulesBuilder({'player': Location.R1})
     r = rb.add
     r(("look",""),"You are in a small room with a bed, a creepy portrait, and an open door.", {'r1_door_open': True}),
     r(("look",""),"You are in a small room with a bed, a creepy portrait, and a closed door."),
@@ -44,9 +44,11 @@ def rules_r1(rb):
             Directly in front of you is another painting, the subject of which looks suspiciously like a slaughtered pig.
             """,{'r1_door_open': True}, {'player': Location.R2}),
     r((("leave",),("go",),("exit",),("use","door")),"The door still closed.")
+    return rb.rules
 
-def rules_r2(rb):
-    rb.default_check = {'player': Location.R2}
+def rules_r2():
+    # cr = cca.create_rule_default_check({'player': Location.R1})
+    rb = cca.RulesBuilder({'player': Location.R2})
     r = rb.add
     r(("look",""),"You are in a room with three doors, yellow, red, and blue.  On the remaining wall is a disturbing painting.")
     r(("look",("painting","picture")),"""
@@ -54,21 +56,20 @@ def rules_r2(rb):
         a hill of dead yellow grass.  Still creepy.  And vaguely porcine.
         """)
     r((("go","yellow"),("use","yellow"), ("yellow","")), "You exit the room through the yellow door.", None, {'player': Location.R1})
+    return rb.rules
 
-def rules_default(rb):
-    rb.add(("die",),"You throw yourself at the ground.  Hard.  Ouch.  The world swirls away into darkness.", None, {'done': True})
-    rb.add(None, lambda v,n,s: "confused by {} {}".format(v,n))
+def rules_default():
+    rb = cca.RulesBuilder()
+    r = rb.add
+    r(("die",),"You throw yourself at the ground.  Hard.  Ouch.  The world swirls away into darkness.", None, {'done': True})
+    r(None, lambda v,n,s: "confused by {} {}".format(v,n))
+    return rb.rules
 
 def create_rules():
-    rb = cca.RulesBuilder()
-    rules_r1(rb)
-    rules_r2(rb)
-    rules_default(rb)
-
-    # xs = rules_r1()
-    # xs.extend(rules_r2())
-    # xs.extend(rules_default())
-    return rb.rules
+    xs = rules_r1()
+    xs.extend(rules_r2())
+    xs.extend(rules_default())
+    return xs
 
 
 
