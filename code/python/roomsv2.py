@@ -1,27 +1,58 @@
 #!/usr/bin/env python3
 
-import sys, os
+# import sys, os
 
-sys.path.append(os.path.abspath(os.path.join('..','lib','python')))
+# sys.path.append(os.path.abspath(os.path.join('..','lib','python')))
 
-import cca
-# from cca import cmd_verb_noun, tern, get_command_from_user
+import ccav2 as cca
 
-# from frozendict import frozendict as State
+class Location:
+    VOID, PLAYER, R1, R2, R3, R4, R5 = range(7)
 
-
-s = cca.State({
+INIT_STATE = cca.State({
     'msg': 'Test', 
+    'debug': False,
     'done': False,
     'r1_door_open': False,
-    'r1_pic_seen': False
+    'r1_pic_seen': False,
+    'player': Location.R1
+
 })
 
-print(s)
-print(s.next(msg='Dead', done=True))
+def create_rules():
+    r = cca.create_rule
+    return [
+        r("look","","You are in a small room with a bed, a creepy portrait, and an open door.", lambda s: s.r1_door_open),
+        r("look","","You are in a small room with a bed, a creepy portrait, and a closed door."),
+        r("look","door","The door is open, revealing a more spacious room beyond.", lambda s: s.r1_door_open),
+        r("look","door","The door is very sturdy, but appears unlocked.", lambda s: not s.r1_door_open),
+        r("open","door","The door is already open.", lambda s: s.r1_door_open),
+        r("open","door","The door creeks open ominously.", None, lambda s: s.next(r1_door_open=True)),
+        r("die",None,"You throw yourself at the ground.  Hard.  Ouch.  The world swirls away into darkness.", None, lambda s: s.next(done=True)),
+        r(None, None, lambda v,n,s: "confused by {} {}".format(v,n))
+    ]
+
+def main():
+    def display(msg):
+        cca.show(msg, 70)
+    lines = [ "look", "look door", "open door", "use door", "look", "look painting" ]
+    gi = cca.TestGameInput(lines).game_input
+    cca.play_game(INIT_STATE, create_rules(), gi, display)
+
+main()
+
+
+
+"""
+print(INIT_STATE)
+print(INIT_STATE.next(msg='Dead', done=True))
+rules = create_rules()
+print(rules[0])
+print(cca.apply_rules(rules, "look", "door", INIT_STATE))
+
 # print(s.set(bob='Dead'))
 # print(s.set(bob='Dead', done2=True))
-print(s)
+# print(s)
 # print(s.msg)
 
 # print(s._State__lookup)
@@ -32,7 +63,7 @@ print(("foo","bar")==("foo","bar"))
 print(("foo","bar")==("foo","bar2"))
 
 
-"""
+r("open","door","The door creeks open ominously.", lambda s: not s.r1_door_open, lambda s: ),
 
 s = State({
     'msg': 'Test', 

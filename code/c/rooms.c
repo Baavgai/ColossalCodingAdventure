@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
-#include "../../lib/c/cca.h"
+#include "cca.h"
 
 // gcc ../../lib/c/cca.c rooms.c
 

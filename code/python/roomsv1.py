@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-import sys, os
+# import sys, os
 
-sys.path.append(os.path.abspath(os.path.join('..','lib','python')))
+# sys.path.append(os.path.abspath(os.path.join('..','lib','python')))
 
-import cca
+import ccav1 as cca
 # from cca import cmd_verb_noun, tern, get_command_from_user
 
 

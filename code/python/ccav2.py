@@ -1,5 +1,6 @@
 class State(object):
     def __init__(self, *args, **kwargs):
+        self._id = 0
         self.__lookup = dict(*args, **kwargs)
 
     def __getitem__(self, key):
@@ -22,13 +23,15 @@ class State(object):
         self.__check_diff(**kwargs)
         d = dict(self.__lookup)
         d.update(**kwargs)
-        return State(**d)
+        s = State(**d)
+        s._id = self._id + 1
+        return s
 
     def __iter__(self):
         return iter(self.__lookup)
 
     def __repr__(self):
-        return "%s(%r)" % (self.__class__, self.__lookup)
+        return "<State (%d) %r>" % (self._id, self.__lookup)
 
 
 class TestGameInput:
@@ -76,6 +79,54 @@ def get_command_from_user():
         line = input().strip()
     return line
 
-def play_game(state, handler, game_input, display):
+def create_rule(verb_match, noun_match, msg_or_msg_func, check = None, mutate = None):
+    def build_rule(match, msg_func, next):
+        def rule(verb, noun, state):
+            if match(verb, noun, state):
+                return next(msg_func(verb, noun, state), state)
+            return None
+        return rule
+    def match_impl(verb, noun, state):
+        if not (verb_match==None or verb_match==verb):
+            return False
+        if not (noun_match==None or noun_match==noun):
+            return False
+        return not check or check(state)
+    def mutate_impl(msg, state):
+        if mutate:
+            return mutate(state.next(msg=msg))
+        else:
+            return state.next(msg=msg)
+    def msg_func_impl(verb, noun, state):
+        if type(msg_or_msg_func)==str:
+            return msg_or_msg_func
+        else:
+            return msg_or_msg_func(verb, noun, state)
+    return build_rule(match_impl, msg_func_impl, mutate_impl)
+
+
+def apply_rules(rules, verb, noun, state):
+    for rule in rules:
+        result = rule(verb, noun, state)
+        if result:
+            return result
+    return state
+
+def play_game(state, rules, game_input, display):
     while not state.done:
-        handler(state, verb_noun(game_input()), display)
+        verb, noun = verb_noun(game_input())
+        state = apply_rules(rules, verb, noun, state)
+        if state.debug:
+            print(state)
+        display(state.msg)
+
+"""
+def localize_create_rule(location_id, location_value):
+    def f(verb_match, noun_match, msg_or_msg_func, check = None, mutate = None):
+        if check:
+            chk2 = lambda state: state[location_id]
+        create_rule(verb_match, noun_match, check, mutate)
+        return not check or check(state)
+    return f
+"""
+    
