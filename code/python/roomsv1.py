@@ -2,11 +2,7 @@
 
 # import sys, os
 
-# sys.path.append(os.path.abspath(os.path.join('..','lib','python')))
-
-import ccav1 as cca
-# from cca import cmd_verb_noun, tern, get_command_from_user
-
+import cca
 
 class Location:
     VOID, PLAYER, R1, R2, R3, R4, R5 = range(7)
@@ -98,24 +94,14 @@ def handler(s, cmd, show):
             show(msg)
             break
 
-def play(game_input):
-    def show(msg):
-        cca.show(msg, 70)
+def play():
+    io = cca.ConsoleIO(70)
     state = State()
-    show(
+    io.display(
         "You awake on a musty smelling bed in a spartan, windowless, room."
         " You see a painting on the wall that seems to be staring at you and a closed door."
         " You feel trapped.  You don't know how you got here, but it can't be good.")
-    cca.play_game(state, handler, game_input, show)
+    while not state.done:
+        handler(state, cca.verb_noun(io.game_input()), io.display)
 
-def main():
-    play(cca.get_command_from_user)
-
-
-def run_test():
-    lines = [ "look", "look door", "open door", "use door", "look", "look painting" ]
-    play(cca.TestGameInput(lines).game_input)
-
-# main()
-run_test()
-
+play()

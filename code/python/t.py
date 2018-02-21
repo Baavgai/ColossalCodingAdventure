@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 
-import roomsv2_data as dat
+import cca
+# import cca.RuleCollection
 
-for rule in dat.all_rules():
+# print(dir(cca))
+# print(dir(cca.RuleCollection))
+
+import roomsv2
+
+for rule in roomsv2.rules():
     print(rule)
