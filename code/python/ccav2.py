@@ -79,37 +79,41 @@ class VerbNounMatcher(object):
 
 
 class Rule(object):
-    def __init__(self, verb_noun, msg_or_msg_func, check = None, mutate = None):
+    def __init__(self, verb_noun, msg, check = None, mutate = None):
         self.vn_match = VerbNounMatcher(verb_noun)
-        self._mutate = mutate
-        self._msg_or_msg_func = msg_or_msg_func
+        self.mutate = mutate
+        self.msg = msg
+        # self.msg = " ".join(msg.split())
+
         if check:
-            self._check = AttrCollection(check).match
+            self.check = AttrCollection(check)
         else:
-            self._check = None
+            self.check = None
 
     def get_msg(self, verb, noun, state):
-        if type(self._msg_or_msg_func)==str:
-            return self._msg_or_msg_func
-        else:
-            return self._msg_or_msg_func(verb, noun, state)
+        d = {'verb': verb, 'noun': noun, 'state': state }
+        return self.msg.format(**d)
 
     def match(self, verb, noun, state):
         if not self.vn_match.match(verb, noun):
             return False
-        if self._check:
-            return self._check(**state)
+        if self.check:
+            return self.check.match(**state)
         return True
     
     def apply(self, verb, noun, state, force = False):
         if force or self.match(verb, noun, state):
             msg = {"msg": self.get_msg(verb,noun,state)}
-            if self._mutate:
-                return state.apply(**msg).apply(**(self._mutate))
+            if self.mutate:
+                return state.apply(**msg).apply(**(self.mutate))
             else:
                 return state.apply(**msg)
         else:
             return None
+
+    def __repr__(self):
+        return "<Rule {} {} [{}] \"{}\">".format(self.vn_match.values, self.check, self.mutate, " ".join(self.msg.split()))
+
 
 class RulesBuilder(object):
     def __init__(self, default_check = None):
