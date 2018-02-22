@@ -14,7 +14,6 @@ char *sanitizeCommandEntered(char *);
 bool parseCommand(Command *, const char *);
 void loadUserCommand(Command *);
 void displayWrap(const int width, const char *s);
-// void display(int width, const char *fmt, ...);
 
 #define MK_DISPLAY_WIDTH_BUFFSIZE(WIDTH,MAX_BUFF) void display(const char *fmt, ...) { \
     char buffer[MAX_BUFF]; \

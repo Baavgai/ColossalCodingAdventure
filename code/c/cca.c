@@ -10,7 +10,6 @@ char *sanitizeCommandEntered(char *cmd) {
     bool lastSpace = true;
     char *s = cmd;
     char *d = cmd;
-    // for(; *s!=' '; s++);
     for(; *s!='\0'; s++) {
         if (*s==' ') {
             if (!lastSpace) {
@@ -79,44 +78,3 @@ void displayWrap(const int width, const char *s) {
     }
     if (*s!='\0') { printf("%s\n", s); } else { putchar('\n'); }
 }
-
-
-/*
-void display(int width, const char *fmt, ...) {
-    char buffer[2000];
-    va_list args;
-    va_start (args, fmt);
-    vsnprintf (buffer, sizeof(buffer)-1, fmt, args);
-    va_end (args);
-    displayWrap(width, buffer);
-}
-
-
-void display(const char *fmt, ...) {
-  char buffer[2000];
-  va_list args;
-  va_start (args, fmt);
-  vsnprintf (buffer, sizeof(buffer)-1, fmt, args);
-  va_end (args);
-  displayWrap(buffer, 70);
-}
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <stdarg.h>
-#include <ctype.h>
-
-void tprintf( int row, int col, char *fmt, ... )
- {
-    va_list ap;
-    char *p1, *p2;
-
-    va_start( ap, fmt );
-    p1 = va_arg( ap, char * );
-    p2 = va_arg( ap, char * );
-    printf( "%c[%2.2d;%2.2dH", ESCAPE, row, col );
-    printf( fmt, p1, p2 );
-    va_end( ap );
- }
-*/
