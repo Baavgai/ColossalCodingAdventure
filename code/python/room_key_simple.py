@@ -51,8 +51,8 @@ def action(s,c):
             display("The locked door bars your escape.")
     elif c in ("look bones", "look bone", "look pile"):
         if s.location_key==LOC_VOID:
-            s.location_key=LOC_BONE_PILE
             display("You find a key in the bones.")
+            s.location_key=LOC_BONE_PILE
         elif s.location_key==LOC_BONE_PILE:
             display("You see bones and a key.")
         else:

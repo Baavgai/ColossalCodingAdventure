@@ -61,74 +61,89 @@ void intro() {
     );
 }
 
+void fail_out() {
+    display("I don't know what you mean");
+}
+
+
 // helpful little macro for matching our command
 #define M(x) (strcmp(c, x)==0)
 // shorthand for display
-#define P(x) display(x)
+// #define P(x) display(x)
 void process_command(State *s, Command c) {
     if (M("look")) {
-        P("You are in a dank cell with moldy stone walls."
-            "There is a torch on the wall and a pile of bones on the floor."
-            "The sturdy door blocks your escape.");
+        display("You see a door, a torch, and a pile of bones.");
     } else if (M("look door")) {
         if (s->door_open && s->loc_torch==LOC_PLAYER) {
-            P("Freedom awaits! There is a pit right outside the door that you can easy walk around.  Good thing you're holding that torch.");
+            display("You can see the way out.");
         } else if (s->door_open) {
-            P("It's very dark beyond the doorway.  Who knows what lies beyond?");
+            display("It is too dark to see beyond the doorway.");
         } else {
-            P("The door is very thick and locked tight.  If only you had a key.");
+            display("The door is locked.");
+        }
+    } else if (M("open door")) {
+        if (s->door_open) {
+            display("The door is already open.");
+        } else if (s->loc_key==LOC_PLAYER) {
+            display("You unlock and open the door.  Beyond is dark.");
+            s->door_open = TRUE;
+        } else {
+            display("The door is locked.");
         }
     } else if (M("leave")||M("go")||M("exit")||M("use door")) {
         if (s->door_open && s->loc_torch==LOC_PLAYER) {
-            P("You are free.  Congratulations!");
+            display("You are free.  Congratulations!");
             s->done = TRUE;
         } else if (s->door_open) {
-            P("You fall in the darkness to your death.  Pity you couldn't have seen that coming.");
+            display("You fall to your death.");
             s->done = TRUE;
         } else {
-            P("The locked door bars your escape.");
+            display("The locked door bars your escape.");
         }
     } else if (M("look bones")||M("look bone")||M("look pile")) {
         if (s->loc_key==LOC_VOID) {
-            P("The bones appear to be human remains.  As you desecrate these, you find an unexpectedly shiny object.  A key!");
+            display("You find a key in the bones.");
             s->loc_key=LOC_BONE_PILE;
         } else if (s->loc_key==LOC_BONE_PILE) {
-            P("You see a human skull and other rotting person bits.  And, of course, that key.");
+            display("You see bones and a key.");
         } else {
-            P("You see a human skull and other rotting person bits.");
+            display("You see a pile of bones.");
         }
     } else if (M("take key")||M("get key")) {
-        if (s->loc_key==LOC_VOID) {
-            P("Sorry, I don't see any keys around here.");
-        } else if (s->loc_key==LOC_PLAYER) {
-            P("You already have a key.  You don't see any more around.");
-        } else {
-            P("You have the key!  And, you know, some unpleasant meaty residue you'd rather not think about.");
+        if (s->loc_key==LOC_PLAYER) {
+            display("You already have a key.  You don't see any more around.");
+        } else if (s->loc_key==LOC_BONE_PILE) {
+            display("You take the key.");
             s->loc_key=LOC_PLAYER;
+        } else {
+            fail_out();
         }
     } else if (M("look key")) {
-        if (s->loc_key==LOC_VOID) {
-            P("Sorry, I don't see any keys around here.");
-        } else if (s->loc_key==LOC_PLAYER) {
-            P("You turn it over your hand.  This could be your key to freedom.");
+        if (s->loc_key==LOC_PLAYER) {
+            display("You have a door key.");
+        } else if (s->loc_key==LOC_BONE_PILE) {
+            display("You see the key in the bone pile.");
         } else {
-            P("It rests in the human bones.  You don't know why the former human didn't use it.  Maybe you could.");
+            fail_out();
         }
     } else if (M("look torch")) {
         if (s->loc_torch==LOC_PLAYER) {
-            P("It burns hot and bright in your raised hand, lighting your way.");
+            display("The torch is in your hand.");
         } else {
-            P("It rests in a rusty wall sconce, allowing you to see your squalid surroundings.  You might be able to get it free, if you wanted.");
+            display("The torch hangs on the wall.");
         }
     } else if (M("take torch")||M("get torch")) {
         if (s->loc_torch==LOC_PLAYER) {
-            P("You're already hold the torch.");
+            display("You already have the torch.");
         } else {
-            P("You manage to wrest the torch free from the wall.  You are now holding the torch aloft.  It's heavier that it looked.");
+            display("You now have the torch.");
             s->loc_torch=LOC_PLAYER;
         }
+    } else if (M("die")) {
+        display("Goodbye cruel world.");
+        s->done = TRUE;
     } else {
-        printf("I don't know what \"%s\" means.\n", c);
+        fail_out();
     }
 }
 
