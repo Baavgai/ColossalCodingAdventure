@@ -28,21 +28,6 @@ function failOut(display) {
     display("I don't know what you mean");
 }
 
-function play(display, userCommandCall, whenDone) {
-    function run(state) {
-        userCommandCall(function(cmd) {
-            gameAction(display, state, cmd);
-            if (state.done) { 
-                whenDone();
-            } else {
-                run(state);
-            }
-        });
-
-    }
-    run(initState())
-}
-
 function gameAction(display, s, cmd) {
     if (cmd === "look") {
         display("You see a door, a torch, and a pile of bones.");
@@ -57,14 +42,14 @@ function gameAction(display, s, cmd) {
     } else if (cmd === "open door") {
         if (s.doorOpen) {
             display("The door is already open.");
-        } else if (s.locKey==Location.Player) {
+        } else if (s.locKey === Location.Player) {
             display("You unlock and open the door.  Beyond is dark.");
-            s.doorOpen = TRUE;
+            s.doorOpen = true;
         } else {
             display("The door is locked.");
         }
-    } else if (cmd==="leave"||cmd==="go"||cmd==="exit"||cmd==="use door") {
-        if (s.doorOpen && s.locTorch===Location.Player) {
+    } else if (cmd === "leave" || cmd === "go" || cmd === "exit" || cmd === "use door") {
+        if (s.doorOpen && s.locTorch === Location.Player) {
             display("You are free.  Congratulations!");
             s.done = true;
         } else if (s.doorOpen) {
@@ -73,49 +58,53 @@ function gameAction(display, s, cmd) {
         } else {
             display("The locked door bars your escape.");
         }
-    } else if (cmd==="look bones"||cmd==="look bone"||cmd==="look pile") {
-        if (s.locKey===Location.Void) {
+    } else if (cmd === "look bones" || cmd === "look bone" || cmd === "look pile") {
+        if (s.locKey === Location.Void) {
             display("You find a key in the bones.");
-            s.locKey=Location.BonePile;
-        } else if (s.locKey===Location.BonePile) {
+            s.locKey = Location.BonePile;
+        } else if (s.locKey === Location.BonePile) {
             display("You see bones and a key.");
         } else {
             display("You see a pile of bones.");
         }
-    } else if (cmd==="take key"||cmd==="get key") {
-        if (s.locKey===Location.Player) {
+    } else if (cmd === "take key" || cmd === "get key") {
+        if (s.locKey === Location.Player) {
             display("You already have a key.  You don't see any more around.");
-        } else if (s.locKey===Location.BonePile) {
+        } else if (s.locKey === Location.BonePile) {
             display("You take the key.");
-            s.locKey=Location.Player;
+            s.locKey = Location.Player;
         } else {
-            fail_out();
+            failOut(display);
         }
-    } else if (cmd==="look key") {
-        if (s.locKey===Location.Player) {
+    } else if (cmd === "look key") {
+        if (s.locKey === Location.Player) {
             display("You have a door key.");
-        } else if (s.locKey===Location.BonePile) {
+        } else if (s.locKey === Location.BonePile) {
             display("You see the key in the bone pile.");
         } else {
-            fail_out();
+            failOut(display);
         }
-    } else if (cmd==="look torch") {
-        if (s.locTorch===Location.Player) {
+    } else if (cmd === "look torch") {
+        if (s.locTorch === Location.Player) {
             display("The torch is in your hand.");
         } else {
             display("The torch hangs on the wall.");
         }
-    } else if (cmd==="take torch"||cmd==="get torch") {
-        if (s.locTorch===Location.Player) {
+    } else if (cmd === "take torch" || cmd === "get torch") {
+        if (s.locTorch === Location.Player) {
             display("You already have the torch.");
         } else {
             display("You now have the torch.");
-            s.locTorch=Location.Player;
+            s.locTorch = Location.Player;
         }
-    } else if (cmd==="die") {
+    } else if (cmd === "die") {
         display("Goodbye cruel world.");
         s.done = true;
     } else {
-        fail_out();
+        failOut(display);
     }
 }
+
+exports.initState = initState;
+exports.intro = intro;
+exports.actionHandler = gameAction;

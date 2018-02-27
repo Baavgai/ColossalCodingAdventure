@@ -1,21 +1,31 @@
 var prompt = require('prompt');
+var lib = require("./roomKeySimpleLib.js");
+
 prompt.start();
 
-WELCOME = [
-"Welcome to Camel Run!" ,
-"You have stolen a camel (you egg!) to make your way across the great Mobi desert." ,
-"The townspeople want their camel back and are chasing you down! Survive your" ,
-"desert trek and outrun the blockos." ,
-"Only drink when necessary. Always use E. to display your status!" ,
-"Do not let your thirst go above 6 and your camel's tiredness above 8."
-].join("\n")
+playGame();
 
-Game.prototype.turn = function(){
-  that = this;
-  console.log('-----------------------')
-  console.log(MENU)
-  console.log('-----------------------')
-  prompt.get( 'choice', function(error, result){
-    that.parseResponse(result)
-  });
-};
+function playGame() {
+    var display = function(txt) { console.log(txt); };
+
+
+    function run(state) {
+        promptUserEntryProvider(function(cmd) {
+            lib.actionHandler(display, state, cmd);
+            if (!state.done) { 
+                // hack to avoid deep recursion
+                setTimeout(function() { run(state); }, 0);
+            }
+        });
+    }
+
+    lib.intro(display);
+    run(lib.initState());
+}
+
+function promptUserEntryProvider(listener) {
+    prompt.get( '> ', function(err, result) {
+        if (err) { console.log(err); }
+        listener(result['> ']);
+    });
+}
