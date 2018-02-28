@@ -1,0 +1,30 @@
+{
+  "version": "0.0.3",
+  "name": "cca-js",
+  "main": "lib/index.js",
+  "private": true,
+  "typescript": {
+    "definition": "build/index"
+  },
+  "typings": "build/index",
+  "scripts": {
+    "vscode-install": "npm install",
+    "clean": "rimraf build",
+    "precompile": "npm run clean",
+    "compile": "tsc",
+    "postcompile": "echo compile done",
+    "prebuild": "npm run compile",
+    "build": "npm version patch",
+    "postbuild": "echo build done",
+    "pretest": "npm run compile",
+    "test": "node ./build/roomKeyNode.js"
+  },
+  "devDependencies": {
+    "ncp": "^2.0.0",
+    "rimraf": "^2.6.2",
+    "typescript": "^2.7.1"
+  },
+  "dependencies": {
+    "prompt": "^1.0.0"
+  }
+}
