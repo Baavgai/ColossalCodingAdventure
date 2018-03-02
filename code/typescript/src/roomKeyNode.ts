@@ -4,12 +4,18 @@ import { RoomWithAKey as Game } from './roomKeyLib';
 import * as lib from './cca';
 import { playGame } from './cca-node';
 
-// playGame(Game);
+// console.log(Game.initialState.msg);
+
+// console.log(Game.initialState.msg.replace(/\s+/g,' ').trim());
+
+// console.log(lib.splitTextLine(50, Game.initialState.msg));
+
+playGame(Game);
 
 // console.log(JSON.stringify(Game, null, 2));
 // console.log(findRule(Game.initialState, toCmd("die"), Game.rules));
 
-Game.rules.map(lib.ruleToStr).forEach(x => console.log(x));
+// Game.rules.map(lib.ruleToStr).forEach(x => console.log(x));
 
 /*
 // console.log(RoomWithAKey.initialState);

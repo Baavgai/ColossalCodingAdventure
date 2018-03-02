@@ -1,7 +1,6 @@
-export interface Command {
-    readonly verb?: string;
-    readonly noun?: string;
-}
+export type Command = [string, string];
+
+// export interface Command {    readonly verb?: string;    readonly noun?: string;}
 
 export type State = { [key:string]: any };
 
@@ -25,16 +24,20 @@ export interface GameDef {
     readonly initialState: { msg: string, done: boolean } & State;
 }
 
+export function createCommand(verb?: string, noun?: string): Command {
+    return [verb, noun];
+}
+
 export function toCmd(s:string): Command {
     const xs = s.trim().toLowerCase().split(" "); //.join(" ");
-    if (xs.length===0) { return { verb: "", noun: "" };  }
+    if (xs.length===0) { return createCommand("", "");  }
     const v = xs[0];
-    if (xs.length===1 && v==="*") { return { };  }
-    if (xs.length===1) { return { verb: v, noun: "" }; }
+    if (xs.length===1 && v==="*") { createCommand();  }
+    if (xs.length===1) { return createCommand(v); }
     const n = xs.slice(1).join(" ");
-    if (v==="*") { return { noun: n }; }
-    if (n==="*") { return { verb: v }; }
-    return { verb: v, noun: n };
+    if (v==="*") { return createCommand(undefined, n); }
+    if (n==="*") { return createCommand(v); }
+    return createCommand(v, n);
 }
 
 export function toCmdMatch(cmdMatch: CommandMatchDef): Command[] {
@@ -74,25 +77,9 @@ export function createRules(cmdMatch: CommandMatchDef, ruleStubs: RuleDefStub[])
 }
 
 
-export class StubAdder {
-    constructor(private rules: Rule[], private cmdMatch: CommandMatchDef) { }
-    add(message: string, stateMatch?: State, changes?: State): StubAdder {
-        console.log(message);
-        this.rules.push(createRule(this.cmdMatch, message, stateMatch, changes));
-        return this;
-    }
-}
 
 
 
-export function createBuilder(rules: Rule[]) {
-    return {
-        adr: (rule: Rule) => rules.push(rule),
-        ad: (cmdMatch: CommandMatchDef, message: string, stateMatch?: State, changes?: State) => 
-            rules.push(createRule(cmdMatch, message, stateMatch, changes)),
-        stub: (cmdMatch: CommandMatchDef) => new StubAdder(rules, cmdMatch)
-    };
-}
 
 
 export function matchState(state: State, subState?:State): boolean {
@@ -105,8 +92,13 @@ export function matchState(state: State, subState?:State): boolean {
     return true;
 }
 
+export function matchCommand(rule: Command, user: Command) {
+    const m = (i:number) => (!rule[i] || rule[i]===user[i])
+    return m(0) && m(1);
+}
+
 export function matchRule(state: State, cmd:Command, rule:Rule): boolean {
-    return rule.cmdMatch.some(x => (!x.verb || x.verb===cmd.verb) && (!x.noun || x.noun===cmd.noun))
+    return rule.cmdMatch.some(x => matchCommand(x, cmd))
         && matchState(state, rule.stateMatch);
 }
 
@@ -142,7 +134,8 @@ export function splitTextLine(width: number, msg: string) {
     if (!msg) { return [""]; }
     let result: string[] = [ ];
     msg.split("\n").forEach(line => {
-        let s = line.trim().split(" ").join(" ");
+        // let s = line.trim().split(" ").join(" ");
+        let s = line.replace(/\s+/g,' ').trim();
         if (s.length===0) { 
             result.push("");
         } else {
@@ -174,53 +167,47 @@ export function carts(xs: string[] | string, ys: string[] | string): string[] {
     }
 }
 
+export interface Builder {
+    addRule: (rule: Rule) => Builder;
+    cmd: (cmdMatch: CommandMatchDef) => Builder;
+    add: (message: string, stateMatch?: State, changes?: State) => Builder;
+    rules: Rule[];
+}
 
-/*
-    stubAdder(cmdMatch: CommandMatchDef) {
-        const f = this.addRule;
-        const adder = function(message: string, stateMatch?: State, changes?: State) {
-            f(cmdMatch, message, stateMatch, changes);
-            return adder;
-        };
-        return { add: adder };
-    }
-    stubAdder(cmdMatch: CommandMatchDef, message: string, stateMatch?: State, changes?: State) {
-        const that = this;
-        this.addRule(cmdMatch, message, stateMatch, changes);
-        return function(message: string, stateMatch?: State, changes?: State) {
-            return that.stubAdder(cmdMatch, message, stateMatch, changes);
-        };
-    }
-    stubAdder(cmdMatch: CommandMatchDef) {
-        const that = this;
-        return { add: add };
-        function add(message: string, stateMatch?: State, changes?: State) {
-            that.addRule(cmdMatch, message, stateMatch, changes);
-            return { add: add };
-        }
-    }
-export class RulesBuilder {
-    private rules: Rule[];
-    constructor() { this.rules = []; }
-    addRuleDef(rule: Rule) { 
-        this.rules.push(rule);
-    }
-    addRule(cmdMatch: CommandMatchDef, message: string, stateMatch?: State, changes?: State) {
-        console.log(message);
-        this.addRuleDef(createRule(cmdMatch, message, stateMatch, changes));
-    }
-    addRules(cmdMatch: CommandMatchDef, ruleStubs: RuleDefStub[]) {
-        createRules(cmdMatch, ruleStubs).forEach(x => this.addRuleDef(x));
+class BuilderImpl implements Builder {
+    private currentCommand: CommandMatchDef = undefined;
+    rules: Rule[] = [];
+    // constructor(private rules: Rule[]) { }    
+    addRule(rule: Rule) { this.rules.push(rule); return this; }
+    cmd(cmdMatch: CommandMatchDef) {
+        this.currentCommand = cmdMatch;
         return this;
     }
-    forStub(cmdMatch: CommandMatchDef) { return new StubAdder(this.rules, cmdMatch);  }
-    getRules() { return this.rules; }
-}
-    switch(xs.length) {
-        case 0: return { };
-        case 1: return { verb: xs[0], noun: "" };
-        case 2: return { verb: xs[0], noun: xs[1] };
-        default: return { verb: xs[0], noun: xs.slice(1).join(" ") };
+    add(message: string, stateMatch?: State, changes?: State) {
+        this.rules.push(createRule(this.currentCommand, message, stateMatch, changes));
+        return this;
     }
+}
+
+
+export function createBuilder(): Builder {
+    return new BuilderImpl();
+        
+}
+
+
+/*
+
+export function toCmd(s:string): Command {
+    const xs = s.trim().toLowerCase().split(" "); //.join(" ");
+    if (xs.length===0) { return { verb: "", noun: "" };  }
+    const v = xs[0];
+    if (xs.length===1 && v==="*") { return { };  }
+    if (xs.length===1) { return { verb: v, noun: "" }; }
+    const n = xs.slice(1).join(" ");
+    if (v==="*") { return { noun: n }; }
+    if (n==="*") { return { verb: v }; }
+    return { verb: v, noun: n };
+}
 
 */

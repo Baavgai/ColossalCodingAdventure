@@ -8,8 +8,7 @@ export function playGame(gd: GameDef, displayWidth = 40) {
     const display = txt => splitTextLine(displayWidth, txt).forEach(x => console.log(x));
     function run(state: State) {
         promptUserEntryProvider(cmd => {
-            console.log(cmd);
-            console.log(toCmd(cmd));
+            // console.log(cmd);            console.log(toCmd(cmd));
             const nextState = applyRules(state, toCmd(cmd), gd.rules);
             display(nextState.msg);
             if (!nextState.done) { 
