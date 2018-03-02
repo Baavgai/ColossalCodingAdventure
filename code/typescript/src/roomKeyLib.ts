@@ -26,6 +26,7 @@ export const RoomWithAKey: lib.GameDef = {
 function buildRules(): lib.Rule[] {
     let rules: lib.Rule[] = [];
     const { ad, adr, stub } = lib.createBuilder(rules);
+    const e = lib.carts;
         
     ad("look", "You see a door, a torch, and a pile of bones.");
     ad("look door", "You can see the way out.", { doorOpen: true, locTorch: Loc.Player });
@@ -43,42 +44,26 @@ function buildRules(): lib.Rule[] {
         .add("You find a key in the bones.", {locKey: Loc.Void}, {locKey: Loc.BonePile})
         .add("You see bones and a key.", {locKey: Loc.BonePile})
         .add("You see a pile of bones.");
+    stub(e(["take", "get"], "key"))
+        .add("You already have a key.  You don't see any more around.", {locKey: Loc.Player})
+        .add("You take the key.", {locKey: Loc.BonePile}, {locKey: Loc.Player})
+        .add("Where do you see a key?");
+    stub("look key")
+        .add("You have a door key.", {locKey: Loc.Player})
+        .add("You see the key in the bone pile.", {locKey: Loc.BonePile})
+        .add("Where do you see a key?");
+    stub("look torch")
+        .add("The torch is in your hand.", {locKey: Loc.Player})
+        .add("The torch hangs on the wall.");
+    stub(e(["take", "get"], "torch"))
+        .add("You already have the torch.", {locKey: Loc.Player})
+        .add("You now have the torch.", undefined, {locKey: Loc.Player})
         
     ad("die *", "Goodbye cruel world.", undefined, {done: true });
     return rules;
 }
 
 /*
-    } else if (cmd === "take key" || cmd === "get key") {
-        if (s.locKey === Location.Player) {
-            display("You already have a key.  You don't see any more around.");
-        } else if (s.locKey === Location.BonePile) {
-            display("You take the key.");
-            s.locKey = Location.Player;
-        } else {
-            failOut(display);
-        }
-    } else if (cmd === "look key") {
-        if (s.locKey === Location.Player) {
-            display("You have a door key.");
-        } else if (s.locKey === Location.BonePile) {
-            display("You see the key in the bone pile.");
-        } else {
-            failOut(display);
-        }
-    } else if (cmd === "look torch") {
-        if (s.locTorch === Location.Player) {
-            display("The torch is in your hand.");
-        } else {
-            display("The torch hangs on the wall.");
-        }
-    } else if (cmd === "take torch" || cmd === "get torch") {
-        if (s.locTorch === Location.Player) {
-            display("You already have the torch.");
-        } else {
-            display("You now have the torch.");
-            s.locTorch = Location.Player;
-        }
     } else if (cmd === "die") {
         display("Goodbye cruel world.");
         s.done = true;

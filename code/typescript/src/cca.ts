@@ -164,6 +164,17 @@ export function ruleToStr(rule: Rule) {
     const c = JSON.stringify(rule.changes);
     return `${m} : ${sm} : ${c}`;
 }
+
+export function carts(xs: string[] | string, ys: string[] | string): string[] {
+    return f(xs)
+        .reduce((acc, x) => { f(ys).forEach(y => acc.push(x + " " + y)); return acc; },
+        []);
+    function f(zs: string[] | string) {
+        return (typeof(zs)==="string") ? [ zs ] : zs;
+    }
+}
+
+
 /*
     stubAdder(cmdMatch: CommandMatchDef) {
         const f = this.addRule;
