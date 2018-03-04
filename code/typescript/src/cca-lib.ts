@@ -2,18 +2,21 @@ export type Command = [string, string];
 
 // export interface Command {    readonly verb?: string;    readonly noun?: string;}
 
-export type State = { [key:string]: any };
+
+export type StateChanges = { [key:string]: any };
+
+export type State = { msg: string, done?: boolean } & StateChanges;
 
 export interface Rule {
     readonly cmdMatch: Command[];
-    readonly changes: State;
-    readonly stateMatch?: State;
+    readonly changes: StateChanges;
+    readonly stateMatch?: StateChanges;
 }
 
 export interface RuleDefStub {
     readonly message: string;
-    readonly stateMatch?: State;
-    readonly changes?: State;
+    readonly stateMatch?: StateChanges;
+    readonly changes?: StateChanges;
 }
 
 export type CommandMatchDef = Command | string | (Command | string)[];
@@ -21,7 +24,7 @@ export type CommandMatchDef = Command | string | (Command | string)[];
 export interface GameDef {
     // readonly intro: string;
     readonly rules: Rule[];
-    readonly initialState: { msg: string, done: boolean } & State;
+    readonly initialState: State;
 }
 
 export function createCommand(verb?: string, noun?: string): Command {
@@ -51,7 +54,7 @@ export function toCmdMatch(cmdMatch: CommandMatchDef): Command[] {
 
 }
 
-export function createRule(cmdMatch: CommandMatchDef, message: string, stateMatch?: State, changes?: State): Rule {
+export function createRule(cmdMatch: CommandMatchDef, message: string, stateMatch?: StateChanges, changes?: StateChanges): Rule {
     return {
         cmdMatch: toCmdMatch(cmdMatch),
         changes: getChanges(),
@@ -68,7 +71,7 @@ export function createRule(cmdMatch: CommandMatchDef, message: string, stateMatc
     }
 }
 
-export function createRuleStub(message: string, stateMatch?: State, changes?: State): RuleDefStub {
+export function createRuleStub(message: string, stateMatch?: StateChanges, changes?: StateChanges): RuleDefStub {
     return { message: message, stateMatch: stateMatch, changes: changes };
 }
 
@@ -76,13 +79,7 @@ export function createRules(cmdMatch: CommandMatchDef, ruleStubs: RuleDefStub[])
     return ruleStubs.map(r => createRule(cmdMatch, r.message, r.stateMatch, r.changes));
 }
 
-
-
-
-
-
-
-export function matchState(state: State, subState?:State): boolean {
+export function matchState(state: State, subState?:StateChanges): boolean {
     if (subState) {
         for(const k in subState) {
             const x = state[k];
@@ -102,8 +99,8 @@ export function matchRule(state: State, cmd:Command, rule:Rule): boolean {
         && matchState(state, rule.stateMatch);
 }
 
-export function applyChanges(state: State, changes: State): State {
-    let next: State = { };
+export function applyChanges(state: State, changes: StateChanges): State {
+    let next: State = { msg: state.msg };
     for(const k in state) {
         next[k] = (k in changes) ? changes[k] : state[k];
     }
@@ -170,7 +167,7 @@ export function carts(xs: string[] | string, ys: string[] | string): string[] {
 export interface Builder {
     addRule: (rule: Rule) => Builder;
     cmd: (cmdMatch: CommandMatchDef) => Builder;
-    add: (message: string, stateMatch?: State, changes?: State) => Builder;
+    add: (message: string, stateMatch?: StateChanges, changes?: StateChanges) => Builder;
     rules: Rule[];
 }
 

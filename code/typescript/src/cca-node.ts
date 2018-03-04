@@ -1,7 +1,6 @@
-export * from './cca';
 import * as prompt from 'prompt';
 
-import { State, GameDef, splitTextLine, applyRules, toCmd, findRule, applyRule } from './cca';
+import { State, GameDef, splitTextLine, applyRules, toCmd, findRule, applyRule } from './cca-lib';
 
 export function playGame(gd: GameDef, displayWidth = 40) {
     prompt.start();

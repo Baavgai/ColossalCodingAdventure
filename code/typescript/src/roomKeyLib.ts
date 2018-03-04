@@ -1,5 +1,4 @@
-//import { State, GameDef, createRule as cr, createRules as crs, createRuleStub as rs, Rule } from './cca';
-import * as lib from './cca';
+import * as lib from './cca-lib';
 
 const Loc = {
     Void: 0,
@@ -61,14 +60,3 @@ function buildRules(): lib.Rule[] {
     .cmd("die *").add("Goodbye cruel world.", undefined, {done: true })
     .rules;
 }
-
-/*
-    } else if (cmd === "die") {
-        display("Goodbye cruel world.");
-        s.done = true;
-    } else {
-        failOut(display);
-    }
-}
-
-*/
