@@ -11,7 +11,7 @@ function toCmd(s) {
     }
     var v = xs[0];
     if (xs.length === 1 && v === "*") {
-        createCommand();
+        return createCommand();
     }
     if (xs.length === 1) {
         return createCommand(v);

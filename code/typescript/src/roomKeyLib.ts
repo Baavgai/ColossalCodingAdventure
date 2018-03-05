@@ -58,5 +58,6 @@ function buildRules(): lib.Rule[] {
         .add("You already have the torch.", {locKey: Loc.Player})
         .add("You now have the torch.", undefined, {locKey: Loc.Player})
     .cmd("die *").add("Goodbye cruel world.", undefined, {done: true })
+    .cmd("*").add("I have no idea what you're asking.")
     .rules;
 }

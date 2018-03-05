@@ -1,8 +1,5 @@
 export type Command = [string, string];
 
-// export interface Command {    readonly verb?: string;    readonly noun?: string;}
-
-
 export type StateChanges = { [key:string]: any };
 
 export type State = { msg: string, done?: boolean } & StateChanges;
@@ -35,7 +32,7 @@ export function toCmd(s:string): Command {
     const xs = s.trim().toLowerCase().split(" "); //.join(" ");
     if (xs.length===0) { return createCommand("", "");  }
     const v = xs[0];
-    if (xs.length===1 && v==="*") { createCommand();  }
+    if (xs.length===1 && v==="*") { return createCommand();  }
     if (xs.length===1) { return createCommand(v); }
     const n = xs.slice(1).join(" ");
     if (v==="*") { return createCommand(undefined, n); }
@@ -90,7 +87,7 @@ export function matchState(state: State, subState?:StateChanges): boolean {
 }
 
 export function matchCommand(rule: Command, user: Command) {
-    const m = (i:number) => (!rule[i] || rule[i]===user[i])
+    const m = (i:number) => (!rule[i] || rule[i]===user[i]);
     return m(0) && m(1);
 }
 
@@ -191,20 +188,3 @@ export function createBuilder(): Builder {
     return new BuilderImpl();
         
 }
-
-
-/*
-
-export function toCmd(s:string): Command {
-    const xs = s.trim().toLowerCase().split(" "); //.join(" ");
-    if (xs.length===0) { return { verb: "", noun: "" };  }
-    const v = xs[0];
-    if (xs.length===1 && v==="*") { return { };  }
-    if (xs.length===1) { return { verb: v, noun: "" }; }
-    const n = xs.slice(1).join(" ");
-    if (v==="*") { return { noun: n }; }
-    if (n==="*") { return { verb: v }; }
-    return { verb: v, noun: n };
-}
-
-*/

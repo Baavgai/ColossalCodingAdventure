@@ -1,5 +1,5 @@
 {
-  "version": "0.0.6",
+  "version": "0.0.7",
   "name": "cca-js",
   "main": "lib/index.js",
   "private": true,
@@ -10,23 +10,32 @@
   "scripts": {
     "vscode-install": "npm install",
     "clean": "rimraf build",
+
     "precompile": "npm run clean",
     "compile": "tsc",
+
     "postcompile": "echo compile done",
     "prebuild": "npm run compile",
-    "build": "npm version patch",
-    "prebuild-web": "rimraf build/web",
-    "build-web": "copyfiles -f ./assets/* build/cca-lib.js build/cca-web.js build/*Lib.js build/*Web.js ./build/web",
-    "postbuild-web": "ls build/web/*",
     "postbuild": "echo build done",
+
+    "build": "npm run build-web",
+
+    "prebuild-web": "npm run compile",
+    "build-web": "copyfiles -f ./assets/* ./build/web",
+    "postbuild-web": "npm run webpack",
+
     "pretest": "npm run compile",
-    "test": "node ./build/roomKeyNode.js"
+    "test": "node ./build/test.js",
+
+    "webpack": "webpack-cli --progress --profile --colors --display-error-details --display-cached"
   },
   "devDependencies": {
     "copyfiles": "^1.2.0",
     "ncp": "^2.0.0",
     "rimraf": "^2.6.2",
-    "typescript": "^2.7.1"
+    "typescript": "^2.7.1",
+    "webpack": "^4.1.0",
+    "webpack-cli": "^2.0.10"
   },
   "dependencies": {
     "prompt": "^1.0.0"
