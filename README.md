@@ -2,7 +2,7 @@
 
 ## Coding Adventure
 
-The programming student can expect to learn the following things first: printing, variables, user input, if-then, and loops.  This toolbox is enough program innumerable, often uninspired, assignments.
+The programming student can expect to learn the following things first: printing, variables, user input, if-then, and loops.  This toolbox is enough to program innumerable, often uninspired, assignments.
 
 Many students at this point realize they know enough to write a game.  And not just the ubiquitous hi-lo thing, but something creative and maybe even epic.  A text adventure!
 
@@ -18,7 +18,7 @@ While the halcyon days of the text adventure genre passed away long before the a
 
 ## Adventure Begins
 
-A text adventure is, in many ways, as easy as it appears: verbiage greeting the player in response to simple commands.  The challenge being more about content than code.  Of course, like any programming project, unexpected complexity lies hidden, waiting to pounce and confound.  Veteran programmers will use a much larger toolbox to solve problems: collections, enums, polymorphism, design patterns, the list goes on.  Indeed, a text adventure framework calls strongly enough to derail the game itself almost from the beginning.
+A text adventure is, in many ways, as easy as it appears: verbiage greeting the player in response to simple commands.  The challenge being more about content than code.  Of course, like any programming project, unexpected complexity lies hidden, waiting to pounce and confound.  Veteran programmers will use a much larger toolbox to solve problems: collections, enums, polymorphism, design patterns, the list goes on.  Indeed, the siren's call to use a "text adventure framework" pulls strongly enough to derail the game itself almost from the beginning.
 
 Fear not!  A text adventure needn't be too advanced for the beginner.  The goal here is to present an example that is easily followed, riffed on, and hopefully provides a foundation for the creative programmer.
 
@@ -27,20 +27,22 @@ Fear not!  A text adventure needn't be too advanced for the beginner.  The goal 
 Keeping it simple, features are:
 
 * Commands in verb-noun format e.g. "open door", "take torch"
-* Different zones that player moves from and to i.e. rooms
+* Different zones that player moves from and to i.e. rooms.
 * Transportable and changeable objects.
   * This one is most challenging for beginners.  Implementations for this also run the gambit, often into the overly complex.
 * Awareness of State ( see below )
 
 ## State
 
-This is a core programming concept that the coding novice may not have run into.  It is in the forefront of game programming: a save game is essentially state sent to storage.  State is simply all the moving parts.  A program begins with initial values and those values change through the course of execution.  This might seem obvious, but it is a valuable abstraction: see [state machine](https://en.wikipedia.org/wiki/Finite-state_machine).
+This is a core programming concept that the coding novice may not have run into.  And, yet, they've been using it all along: variables.
+
+State is in the forefront of game programming: a save game is essentially state sent to storage.  State is simply all the moving parts.  A program begins with initial values and those values change through the course of execution.  This might seem obvious, but it is a valuable abstraction: see [state machine](https://en.wikipedia.org/wiki/Finite-state_machine).
 
 In our text game, various discrete objects have their own state.  The state of all objects at a given moment impacts how the game reacts to the player.  If this sounds more involved than expected for a simple text adventure, well, now you're getting the idea.
 
 There are locations in which the player finds themselves.  There are objects that may be picked up or put down, in which case they change location.  Or objects might be opened or closed, in which case the object itself has changed state.  Note that since the player may carry objects, the player themselves is technically a location.
 
-Another location can be the **void**.  This supports the idea that objects can be introduced into or removed from our game world.  The match you just struck?  The unlit match has moved to the void, the lit match has moved from the void and will return shortly.  The concept behind this is that we define all objects initially and needn't worry about new objects magically appearing as we program.  This isn't always appropriate, but for this kind of text adventure it makes life easier.
+Another location can be the **void**.  This supports the idea that objects can be introduced into, or removed, from our game world.  The match you just struck?  The unlit match has moved to the void, the lit match has moved from the void and will return shortly.  The concept behind this is that we define all objects initially and needn't worry about new objects magically appearing as we program.  This isn't always appropriate, but for this kind of text adventure it makes life easier.
 
 ## Games
 

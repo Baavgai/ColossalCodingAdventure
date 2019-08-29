@@ -105,6 +105,9 @@ function gameAction(display, s, cmd) {
     }
 }
 
-exports.initState = initState;
-exports.intro = intro;
-exports.actionHandler = gameAction;
+if (typeof window === 'undefined') {
+    exports.initState = initState;
+    exports.intro = intro;
+    exports.actionHandler = gameAction;
+}
+

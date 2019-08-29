@@ -80,8 +80,10 @@ function splitTextLine(width, msg) {
     return result;
 }
 
-exports.createMonitor = createMonitor;
-exports.splitTextLine = splitTextLine;
+if (typeof window === 'undefined') {
+    exports.createMonitor = createMonitor;
+    exports.splitTextLine = splitTextLine;
+}
 
 /*
 function createKey()
